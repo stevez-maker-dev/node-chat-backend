@@ -1,17 +1,5 @@
 import User from '../models/User.js';
 
-// Create a new user
-export const createUser = async (req, res, next) => {
-    try {
-        const { username, password, email } = req.body;
-        const user = await User.create({ username, password, email });
-        res.status(201).json({ success: true, data: user, message: 'Usuario creado exitosamente' });
-    } catch (error) {
-        res.status(400);
-        next(error);
-    }
-}
-
 // Get all users
 export const getUsers = async (req, res, next) => {
     try {
