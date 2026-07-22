@@ -17,10 +17,12 @@ API RESTful desarrollada con **Node.js**, **Express** y **MongoDB** que sirve co
 node-chat-backend/
 ├── src/
 │   ├── routes/
+│   │   ├── authRoutes.js
 │   │   ├── userRoutes.js
 │   │   ├── chatRoutes.js
 │   │   └── messageRoutes.js
 │   ├── controllers/
+│   │   ├── authController.js
 │   │   ├── userController.js
 │   │   ├── chatController.js
 │   │   └── messageController.js
@@ -29,9 +31,11 @@ node-chat-backend/
 │   │   ├── Chat.js
 │   │   └── Message.js
 │   ├── middlewares/
-│   │   └── errorHandler.js
+│   │   ├── errorHandler.js
+│   │   └── authMiddleware.js
 │   ├── config/
 │   │   └── db.js
+│   │   └── enviroment.js
 │   └── app.js
 ├── package.json
 ├── .env.example
@@ -61,6 +65,7 @@ Creá un archivo `.env` en la raíz del proyecto, tomando como referencia `.env.
 ```
 MONGODB_URI=tu_connection_string_de_mongodb_atlas
 PORT=3000
+JWT_SECRET=un_texto_secreto_largo_y_dificil_de_adivinar
 ```
 
 ### 4. Ejecutar el servidor
@@ -89,18 +94,23 @@ Todas las respuestas de la API siguen el mismo formato:
 - `data`: el recurso solicitado/creado, o `null` en caso de error
 - `message`: mensaje descriptivo del resultado
 
-## 🔌 Endpoints
+## Endpoints
+ 
+> 🔒 Todas las rutas de `/api/users`, `/api/chats` y `/api/messages` requieren autenticación. Hay que enviar el token JWT obtenido en el login como header:
+> ```
+> Authorization: Bearer <token>
+> ```
+> Las únicas rutas públicas son `/api/auth/register` y `/api/auth/login`.
 
-### Users — `/api/users`
-
+### Auth — `/api/auth`
+ 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | `/api/users` | Crea un nuevo usuario |
-| GET | `/api/users` | Lista todos los usuarios |
-| DELETE | `/api/users/:id` | Elimina un usuario por ID |
-
-**POST `/api/users`**
-
+| POST | `/api/auth/register` | Registra un nuevo usuario (hashea el password con bcrypt) |
+| POST | `/api/auth/login` | Autentica un usuario y devuelve un token JWT |
+ 
+**POST `/api/auth/register`**
+ 
 Request:
 ```json
 {
@@ -109,7 +119,7 @@ Request:
   "password": "123456"
 }
 ```
-
+ 
 Response `201`:
 ```json
 {
@@ -118,16 +128,61 @@ Response `201`:
     "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
     "username": "sebas91",
     "email": "sebas@test.com",
-    "password": "123456",
     "createdAt": "2026-07-20T12:00:00.000Z",
     "updatedAt": "2026-07-20T12:00:00.000Z"
   },
   "message": "Usuario creado exitosamente"
 }
 ```
+ 
+**POST `/api/auth/login`**
+ 
+Request:
+```json
+{
+  "username": "sebas91",
+  "password": "123456"
+}
+```
+ 
+Response `200`:
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "_id": "66f1a2b3c4d5e6f7a8b9c0d1",
+      "username": "sebas91",
+      "email": "sebas@test.com",
+      "createdAt": "2026-07-20T12:00:00.000Z",
+      "updatedAt": "2026-07-20T12:00:00.000Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  },
+  "message": "Usuario autenticado exitosamente"
+}
+```
+ 
+Response `401` (credenciales inválidas, mensaje genérico por seguridad):
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Credenciales inválidas"
+}
+```
+ 
+---
 
+### Users — `/api/users` 🔒
+ 
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/users` | Lista todos los usuarios |
+| DELETE | `/api/users/:id` | Elimina un usuario por ID |
+ 
 **GET `/api/users`**
-
+ 
 Response `200`:
 ```json
 {
@@ -136,9 +191,9 @@ Response `200`:
   "message": "Usuarios obtenidos exitosamente"
 }
 ```
-
+ 
 **DELETE `/api/users/:id`**
-
+ 
 Response `200`:
 ```json
 {
@@ -147,7 +202,7 @@ Response `200`:
   "message": "Usuario eliminado exitosamente"
 }
 ```
-
+ 
 Response `404` (si el ID no existe):
 ```json
 {
@@ -156,7 +211,7 @@ Response `404` (si el ID no existe):
   "message": "Usuario no encontrado"
 }
 ```
-
+ 
 ---
 
 ### Chats — `/api/chats`
@@ -285,18 +340,20 @@ Response `200` (ordenado del mensaje más viejo al más nuevo, con datos del rem
 El backend está preparado para ser consumido por un cliente React (u otro framework) mediante peticiones HTTP estándar. Ejemplo de consumo con `fetch`:
 
 ```javascript
-// Crear un usuario
-const response = await fetch("http://localhost:3000/api/users", {
+// 1. Login para obtener el token
+const loginResponse = await fetch("http://localhost:3000/api/auth/login", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    username: "sebas91",
-    email: "sebas@test.com",
-    password: "123456"
-  })
+  body: JSON.stringify({ username: "sebas91", password: "123456" })
 });
-
-const { success, data, message } = await response.json();
+const { data } = await loginResponse.json();
+const { token } = data;
+ 
+// 2. Usar el token en requests a rutas protegidas
+const chatsResponse = await fetch("http://localhost:3000/api/chats", {
+  headers: { "Authorization": `Bearer ${token}` }
+});
+const { success, data: chats, message } = await chatsResponse.json();
 ```
 
 Como todas las respuestas siguen el formato `{ success, data, message }`, el frontend puede manejar de forma consistente tanto los casos de éxito como los de error, verificando el flag `success` antes de usar `data`.
