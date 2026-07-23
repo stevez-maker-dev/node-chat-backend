@@ -4,14 +4,14 @@ API RESTful desarrollada con **Node.js**, **Express** y **MongoDB** que sirve co
 
 > Trabajo Final Integrador — Desarrollo en Node.js — Centro de e-Learning UTN BA
 
-## 🚀 Tecnologías utilizadas
+## Tecnologías utilizadas
 
 - Node.js
 - Express.js
 - MongoDB + Mongoose
 - dotenv
 
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 node-chat-backend/
@@ -43,7 +43,7 @@ node-chat-backend/
 └── README.md
 ```
 
-## ⚙️ Instalación y ejecución
+## Instalación y ejecución
 
 ### 1. Clonar el repositorio
 
@@ -78,7 +78,7 @@ npm run dev
 
 El servidor va a levantar en `http://localhost:3000` (o el puerto que hayas definido en `.env`).
 
-## 📦 Formato de respuesta estandarizado
+## Formato de respuesta estandarizado
 
 Todas las respuestas de la API siguen el mismo formato:
 
@@ -335,7 +335,7 @@ Response `200` (ordenado del mensaje más viejo al más nuevo, con datos del rem
 }
 ```
 
-## 🌐 Conexión con el frontend (React)
+## Conexión con el frontend (React)
 
 El backend está preparado para ser consumido por un cliente React (u otro framework) mediante peticiones HTTP estándar. Ejemplo de consumo con `fetch`:
 
@@ -360,10 +360,10 @@ Como todas las respuestas siguen el formato `{ success, data, message }`, el fro
 
 **CORS:** si el frontend corre en un origen distinto (por ejemplo `http://localhost:5173` con Vite), puede ser necesario habilitar el middleware `cors` en el backend para permitir las peticiones cross-origin.
 
-## 🚧 Despliegue
+## Despliegue
 
 *(Pendiente — se va a desplegar en Render/Railway y se actualizará este enlace)*
 
-## 👤 Autor
+## Autor
 
 Sebastián — [GitHub](https://github.com/sebastevez91)
