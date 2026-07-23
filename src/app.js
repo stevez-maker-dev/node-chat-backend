@@ -6,9 +6,11 @@ import authRoutes from './routes/authRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import errorHandler from './middlewares/errorHandler.js';
 import enviroment from './config/enviroment.js';
+import cors from 'cors';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/chats', chatRoutes);
