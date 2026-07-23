@@ -362,7 +362,7 @@ Como todas las respuestas siguen el formato `{ success, data, message }`, el fro
 
 ## Despliegue
 
-*(Pendiente — se va a desplegar en Render/Railway y se actualizará este enlace)*
+[Deploy](https://node-chat-backend-two.vercel.app/)
 
 ## Autor
 
